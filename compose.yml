@@ -1,0 +1,67 @@
+services:
+  web:
+    image: registry.harmony.ac/harmony-enterprise
+    environment:
+      HARMONY_LICENSE_KEY:
+
+      DATABASE_URL: postgres://${DB_USER:-harmony}:${DB_PASSWORD:-dbpassword}@${POSTGRES_HOST:-db}:5432/${DB_NAME:-harmony}
+
+      NODE_OPTIONS: --max_old_space_size=4096
+      DOMAIN:
+      FRONTEND_URL: https://$DOMAIN
+
+      RUNNER_HOST_PORT: runner:4757
+
+      ANTHROPIC_API_KEY:
+      GOOGLE_GENERATIVE_AI_API_KEY:
+    restart: unless-stopped
+    depends_on:
+      - db
+      - runner
+    healthcheck:
+      test: curl --fail http://localhost:3002 | head -3 | grep -i DOCTYPE || exit 1
+      interval: 5s
+      timeout: 8s
+      retries: 5
+      start_period: 35s
+
+  runner:
+    image: registry.harmony.ac/harmony-enterprise
+    command: npm run start:runner
+    environment:
+      DATABASE_URL: postgres://${DB_USER:-harmony}:${DB_PASSWORD:-dbpassword}@${POSTGRES_HOST:-db}:5432/${DB_NAME:-harmony}
+    depends_on:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: curl http://localhost:4757 | head -3 | grep -i DOCTYPE || exit 1
+      interval: 5s
+      timeout: 8s
+      retries: 5
+      start_period: 35s
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${DB_NAME:-harmony}
+      POSTGRES_USER: ${DB_USER:-harmony}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dbpassword}
+    volumes:
+      - data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:1.28
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${SSL_CERT_PATH}:/etc/nginx/certs/cert.pem:ro
+      - ${SSL_KEY_PATH}:/etc/nginx/certs/key.pem:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  data:
