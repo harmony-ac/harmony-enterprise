@@ -1,4 +1,4 @@
-# Harmony Enterprise - On-Premises Installation Guide
+# Harmony Enterprise Installation Guide
 
 Harmony Enterprise is the self-hosted version of [Harmony](https://harmony.ac).
 
@@ -26,7 +26,13 @@ Harmony Enterprise is the self-hosted version of [Harmony](https://harmony.ac).
 - **Git**: for cloning this repository
 - **Docker Engine**: Version 28.0 or later
 - **Docker Compose**: Version 2.34 or later
-- **SSL Certificate for HTTPS**: Valid internally usable SSL certificate and private key
+
+### Required keys
+
+- **Harmony License Key**: You get this at purchase.
+- **Anthropic API Key**: For using Anthropic's language models.
+- **Google Generative AI API Key**: For using Google's language models.
+- **SSL Certificate and private key for HTTPS**: Valid internally usable SSL certificate and private key for your server's domain name (e.g., `harmony.mycompany.intra`). Can be self-signed if the users' browsers are configured to trust it.
 
 ## Installation
 
