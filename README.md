@@ -73,7 +73,7 @@ SSL_CERT_PATH=/path/to/your/certificate.pem
 SSL_KEY_PATH=/path/to/your/private.pem
 ```
 
-### 4. Log in to
+### 4. Log in to registry
 
 With the credentials you received at purchase, log in to Harmony Docker Registry:
 
