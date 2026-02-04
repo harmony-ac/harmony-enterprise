@@ -7,8 +7,10 @@ Harmony Enterprise is the self-hosted version of [Harmony](https://harmony.ac).
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Updating](#updating)
+- [Password resets](#password-resets)
 - [Operations](#operations)
 - [Troubleshooting](#troubleshooting)
+- [Backup and Recovery](#backup-and-recovery)
 - [Support](#support)
 
 ## Prerequisites
@@ -36,7 +38,7 @@ Harmony Enterprise is the self-hosted version of [Harmony](https://harmony.ac).
 
 ## Installation
 
-### 1. Clone repository
+### 1. Clone this repository
 
 ```bash
 git clone https://github.com/harmony-ac/harmony-enterprise
@@ -71,16 +73,24 @@ SSL_CERT_PATH=/path/to/your/certificate.pem
 SSL_KEY_PATH=/path/to/your/private.pem
 ```
 
-### 4. Start services
+### 4. Log in to
+
+With the credentials you received at purchase, log in to Harmony Docker Registry:
+
+```bash
+docker login registry.harmony.ac
+```
+
+### 5. Start services
 
 ```bash
 # Start all services
 docker compose up -d
 ```
 
-### 5. Test the installation
+### 6. Test the installation
 
-Open your browser and navigate to the server's domain (e.g., `https://harmony.mycompany.intra`).
+Open your browser and navigate to the server's domain (e.g., `https://harmony.mycompany.intra`). You should see a login page.
 
 ### Database Persistence
 
@@ -106,6 +116,14 @@ nano .env
 docker compose up -d --pull=always
 # Optional: Remove unused images to free up space
 docker image prune
+```
+
+## Password resets
+
+The on-premises version does not have email-based password resets. To reset a user's password, use the following command:
+
+```bash
+docker compose exec web password_reset joe@exmaple.com
 ```
 
 ## Operations
