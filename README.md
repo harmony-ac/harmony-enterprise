@@ -73,6 +73,15 @@ SSL_CERT_PATH=/path/to/your/certificate.pem
 SSL_KEY_PATH=/path/to/your/private.pem
 ```
 
+<details>
+<summary>How to generate self-signed certificates</summary>
+<em>If you don't have SSL certificates, you can generate self-signed certificates as below. You will need to add the generated certificate to the trusted certificates in the users' operating system.</em>
+
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=My Company/OU=My Department/CN=harmony.mycompany.intra"
+```
+</details>
+
 ### 4. Log in to registry
 
 With the credentials you received at purchase, log in to Harmony Docker Registry:
