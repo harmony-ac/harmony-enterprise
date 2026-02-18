@@ -1,6 +1,6 @@
 # Harmony Enterprise Installation Guide
 
-Harmony Enterprise is the self-hosted version of [Harmony](https://harmony.ac).
+This guide provides instructions for installing and managing Harmony Enterprise, the self-hosted version of [Harmony](https://harmony.ac), using Docker Compose. 
 
 ## Table of Contents
 
@@ -32,6 +32,7 @@ Harmony Enterprise is the self-hosted version of [Harmony](https://harmony.ac).
 ### Required keys
 
 - **Harmony License Key**: You get this at purchase.
+- **Harmony Container Registry login credentials**: You get this at purchase.
 - **Anthropic API Key**: For using Anthropic's language models.
 - **Google Generative AI API Key**: For using Google's language models.
 - **SSL Certificate and private key for HTTPS**: Valid internally usable SSL certificate and private key for your server's domain name (e.g., `harmony.mycompany.intra`). Can be self-signed if the users' browsers are configured to trust it.
@@ -82,7 +83,7 @@ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -node
 ```
 </details>
 
-### 4. Log in to registry
+### 4. Log in to Harmony Container Registry
 
 With the credentials you received at purchase, log in to Harmony Docker Registry:
 

@@ -1,6 +1,6 @@
 services:
   app:
-    image: registry.harmony.ac/harmony-enterprise
+    image: registry.harmony.ac/enterprise/harmony
     environment:
       HARMONY_LICENSE_KEY:
 
@@ -26,7 +26,7 @@ services:
       start_period: 35s
 
   runner:
-    image: registry.harmony.ac/harmony-enterprise
+    image: registry.harmony.ac/enterprise/harmony
     command: npm run start:runner
     environment:
       DATABASE_URL: postgres://${DB_USER:-harmony}:${DB_PASSWORD:-dbpassword}@${POSTGRES_HOST:-db}:5432/${DB_NAME:-harmony}
