@@ -16,6 +16,7 @@ services:
       GOOGLE_GENERATIVE_AI_API_KEY:
 
       PROMPT_MANAGER: bundled
+      LLM_TELEMETRY: none
     restart: unless-stopped
     depends_on:
       - db
