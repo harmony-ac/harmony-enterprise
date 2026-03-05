@@ -152,6 +152,8 @@ git pull
 # See changes in .env.example since latest pull, and update your .env if needed
 git diff HEAD@{1}..HEAD -- .env.example
 nano .env
+# Stop all services
+docker compose stop
 # Pull latest images and restart services if needed
 docker compose up -d --pull=always
 # Optional: Remove unused images to free up space
