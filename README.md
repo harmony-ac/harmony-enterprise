@@ -1,6 +1,6 @@
 # Harmony Enterprise Installation Guide
 
-This guide provides instructions for installing and managing Harmony Enterprise, the self-hosted version of [Harmony](https://harmony.ac), using Docker Compose. 
+This guide provides instructions for installing and managing Harmony Enterprise, the self-hosted version of [Harmony](https://harmony.ac), using Docker Compose.
 
 ## Table of Contents
 
@@ -76,11 +76,41 @@ SSL_KEY_PATH=/path/to/your/private.pem
 
 <details>
 <summary>How to generate self-signed certificates</summary>
-<em>If you don't have SSL certificates, you can generate self-signed certificates as below. You will need to add the generated certificate to the trusted certificates in the users' operating system.</em>
+<em>If you don't have SSL certificates, you can generate a local CA and a server certificate signed by it. Browsers require these to be separate — a CA cert cannot be used directly as a server cert. You will need to add the CA certificate to the trusted certificates in the users' browsers or operating systems.</em>
 
 ```bash
-openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=My Company/OU=My Department/CN=harmony.mycompany.intra"
+COMPANY="My Company"
+DOMAIN="harmony.mycompany.intra"
+
+# Step 1: Generate CA key and self-signed CA certificate, valid for 10 years
+# (enter a new passphrase when prompted, or add -noenc option to skip passphrase)
+openssl req -x509 -newkey rsa:2048 -days 3650 \
+  -keyout harmony-ca.key -out harmony-ca.crt \
+  -subj "/C=US/ST=State/L=City/O=$COMPANY/OU=IT/CN=$COMPANY CA" \
+  -addext "basicConstraints=critical,CA:TRUE" \
+  -addext "keyUsage=critical,keyCertSign,cRLSign"
+
+# Step 2: Generate server key and certificate signing request (CSR)
+openssl req -newkey rsa:2048 -noenc \
+  -keyout key.pem -out harmony.csr \
+  -subj "/C=US/ST=State/L=City/O=$COMPANY/OU=IT/CN=$DOMAIN"
+
+# Step 3: Sign the server certificate with the CA (enter CA key passphrase you added in Step 1)
+openssl x509 -req -in harmony.csr -CA harmony-ca.crt -CAkey harmony-ca.key -CAcreateserial \
+  -out cert.pem -days 365 -sha256 \
+  -extfile <(printf "subjectAltName=DNS:$DOMAIN\nbasicConstraints=critical,CA:FALSE\nextendedKeyUsage=serverAuth")
+
+# Clean up CSR
+rm harmony.csr
+
+# Keep your CA key (harmony-ca.key) and server key (key.pem) secure.
 ```
+
+Then distribute `harmony-ca.crt` to users so they can add it to their browser/OS trust store:
+
+- **Linux (system-wide):** `sudo cp harmony-ca.crt /usr/local/share/ca-certificates/harmony-ca.crt && sudo update-ca-certificates`
+- **Firefox:** Settings → Privacy & Security → View Certificates → Authorities → Import `harmony-ca.crt` → check _Trust this CA to identify websites_
+- **Chrome/Edge on Linux:** Uses the system trust store — the system-wide step above is sufficient.
 </details>
 
 ### 4. Log in to Harmony Container Registry
