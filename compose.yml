@@ -30,7 +30,7 @@ services:
 
   runner:
     image: registry.harmony.ac/enterprise/harmony
-    command: npm run start:runner
+    command: npm run start:runner -- --origin=https://${DOMAIN}
     restart: unless-stopped
     healthcheck:
       test: curl http://localhost:4757 | head -3 | grep -i DOCTYPE || exit 1
