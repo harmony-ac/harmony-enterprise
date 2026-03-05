@@ -31,10 +31,6 @@ services:
   runner:
     image: registry.harmony.ac/enterprise/harmony
     command: npm run start:runner
-    environment:
-      DATABASE_URL: postgres://${DB_USER:-harmony}:${DB_PASSWORD:-dbpassword}@${POSTGRES_HOST:-db}:5432/${DB_NAME:-harmony}
-    depends_on:
-      - db
     restart: unless-stopped
     healthcheck:
       test: curl http://localhost:4757 | head -3 | grep -i DOCTYPE || exit 1
@@ -64,6 +60,7 @@ services:
       - ${SSL_KEY_PATH}:/etc/nginx/certs/key.pem:ro
     depends_on:
       - app
+      - runner
     restart: unless-stopped
 
 volumes:
