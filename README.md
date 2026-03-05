@@ -21,7 +21,7 @@ This guide provides instructions for installing and managing Harmony Enterprise,
 - **CPU**: 4+ cores recommended
 - **Memory**: 8GB+ RAM recommended
 - **Storage**: 20GB+ disk space
-- **Network**: Internet connectivity for LLM API access (Anthropic, Google AI)
+- **Network**: Internet connectivity for LLM API access (Anthropic API)
 
 ### Required Software
 
@@ -34,7 +34,6 @@ This guide provides instructions for installing and managing Harmony Enterprise,
 - **Harmony License Key**: You get this at purchase.
 - **Harmony Container Registry login credentials**: You get this at purchase.
 - **Anthropic API Key**: For using Anthropic's language models.
-- **Google Generative AI API Key**: For using Google's language models.
 - **SSL Certificate and private key for HTTPS**: Valid internally usable SSL certificate and private key for your server's domain name (e.g., `harmony.mycompany.intra`). Can be self-signed if the users' browsers are configured to trust it.
 
 ## Installation
@@ -130,27 +129,16 @@ docker compose up -d
 
 ### 6. Test the installation
 
-Open your browser and navigate to the server's domain (e.g., `https://harmony.mycompany.intra`). You should see a login page.
-
-### Database Persistence
-
-Database data is persisted in a Docker volume. To backup:
-
-```bash
-# Backup database
-docker compose exec db pg_dump -U harmony harmony > backup.sql
-
-# Restore database
-docker compose exec -T db psql -U harmony harmony < backup.sql
-```
+Open your browser and navigate to the server's domain (e.g., `https://harmony.mycompany.intra`). You should see a registration & login page.
 
 ## Updating
 
 ```bash
 # Fetch the latest version of this configuration
 git pull
-# See changes in .env.example since latest pull, and update your .env if needed
+# See changes in .env.example since latest pull
 git diff HEAD@{1}..HEAD -- .env.example
+# If needed, update your .env with any new settings
 nano .env
 # Stop all services
 docker compose stop
@@ -263,21 +251,23 @@ tail -f /var/log/nginx/access.log
 
 ## Backup and Recovery
 
-### Backup Strategy
+### Creating a backup
+
+The following script creates a backup in the backups/harmony-(time) folder.
 
 ```bash
 #!/bin/bash
-# backup-harmony.sh
-BACKUP_DIR="/backups/harmony-$(date +%Y%m%d)"
+# backup.sh
+BACKUP_DIR="backups/harmony-$(date +%Y-%m-%d_%H:%M:%S)"
 mkdir -p "$BACKUP_DIR"
 
-# Backup database
+# Back up database
 docker compose exec -T db pg_dump -U harmony harmony > "$BACKUP_DIR/database.sql"
 
-# Backup environment configuration
+# Back up environment configuration
 cp .env "$BACKUP_DIR/"
 
-# Backup certificates
+# Back up certificates
 cp cert.pem key.pem "$BACKUP_DIR/"
 
 echo "Backup completed: $BACKUP_DIR"
@@ -286,15 +276,22 @@ echo "Backup completed: $BACKUP_DIR"
 ### Recovery
 
 ```bash
-# Restore database from backup
-docker compose exec -T db psql -U harmony harmony < /path/to/backup/database.sql
+# Set this to the specific backup you want to restore
+BACKUP_DIR="backups/harmony-........"
+
+# Stop services using the db
+docker compose stop app
+
+# Restore database from backup. WARNING: This will overwrite the current database.
+docker compose exec -T db psql -U harmony -c "DROP DATABASE harmony;" postgres
+docker compose exec -T db psql -U harmony -c "CREATE DATABASE harmony;" postgres
+docker compose exec -T db psql -U harmony harmony < "$BACKUP_DIR/database.sql"
 
 # Restore configuration
-cp /path/to/backup/.env ./
-cp /path/to/backup/*.pem ./
-
+cp "$BACKUP_DIR/.env" ./
+cp "$BACKUP_DIR"/*.pem ./
 # Restart services
-docker compose down && docker compose up -d
+docker compose up -d
 ```
 
 ## Support
